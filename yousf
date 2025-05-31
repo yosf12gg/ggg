@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>لعبة سونيك بسيطة</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; overflow: hidden;
+    background: linear-gradient(to top, #87ceeb 0%, #fff 100%);
+    font-family: Arial, sans-serif;
+    user-select: none;
+  }
+  #game {
+    position: relative;
+    width: 800px;
+    height: 300px;
+    margin: 20px auto;
+    background: linear-gradient(to bottom, #4caf50 0%, #2e7d32 100%);
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #333;
+  }
+  #ground {
+    position: absolute;
+    bottom: 0;
+    width: 1600px; height: 60px;
+    background: repeating-linear-gradient(
+      to right,
+      #8bc34a,
+      #8bc34a 20px,
+      #689f38 20px,
+      #689f38 40px
+    );
+    animation: moveGround 4s linear infinite;
+  }
+  @keyframes moveGround {
+    0% { left: 0; }
+    100% { left: -800px; }
+  }
+  #sonic {
+    position: absolute;
+    bottom: 60px;
+    left: 50px;
+    width: 50px;
+    height: 50px;
+    background: url('https://i.imgur.com/8oJwxNo.png') no-repeat center/contain;
+    transition: left 0.1s;
+  }
+  .ring {
+    position: absolute;
+    width: 30px; height: 30px;
+    background: gold;
+    border-radius: 50%;
+    box-shadow: inset 0 0 10px #fff, 0 0 5px #ff0;
+  }
+  #score {
+    position: absolute;
+    top: 10px; left: 10px;
+    font-size: 20px;
+    color: #333;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+  }
+</style>
+</head>
+<body>
+  <div id="game">
+    <div id="ground"></div>
+    <div id="sonic"></div>
+    <div id="score">النقاط: 0</div>
+  </div>
+
+<script>
+  const game = document.getElementById('game');
+  const sonic = document.getElementById('sonic');
+  const scoreDisplay = document.getElementById('score');
+
+  let sonicPos = 50;
+  let score = 0;
+  const moveStep = 20;
+  const gameWidth = 800;
+  const rings = [];
+  const ringCount = 5;
+
+  // إنشاء الحلقات في أماكن عشوائية
+  function createRings() {
+    for(let i=0; i<ringCount; i++){
+      const ring = document.createElement('div');
+      ring.classList.add('ring');
+      ring.style.bottom = '80px';
+      ring.style.left = (150 + i * 120) + 'px';
+      game.appendChild(ring);
+      rings.push(ring);
+    }
+  }
+  createRings();
+
+  // تحريك شخصية سونيك
+  window.addEventListener('keydown', e => {
+    if(e.key === 'ArrowRight') {
+      sonicPos = Math.min(sonicPos + moveStep, gameWidth - 50);
+      sonic.style.left = sonicPos + 'px';
+    } else if(e.key === 'ArrowLeft') {
+      sonicPos = Math.max(sonicPos - moveStep, 0);
+      sonic.style.left = sonicPos + 'px';
+    }
+  });
+
+  // التحقق من التقاط الحلقات
+  function checkCollision() {
+    rings.forEach((ring, index) => {
+      const ringRect = ring.getBoundingClientRect();
+      const sonicRect = sonic.getBoundingClientRect();
+
+      if(
+        ringRect.left < sonicRect.right &&
+        ringRect.right > sonicRect.left &&
+        ringRect.top < sonicRect.bottom &&
+        ringRect.bottom > sonicRect.top
+      ){
+        // جمع الحلقة
+        score++;
+        scoreDisplay.textContent = 'النقاط: ' + score;
+        ring.remove();
+        rings.splice(index, 1);
+      }
+    });
+  }
+
+  // تحديث اللعبة كل 100ms
+  setInterval(() => {
+    checkCollision();
+  }, 100);
+
+</script>
+</body>
+</html>
